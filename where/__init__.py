@@ -1,7 +1,10 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import os
 import platform
+
+
+__all__ = ['first', 'iwhere', 'where', 'which']
 
 
 def where(filename):
@@ -10,26 +13,42 @@ def where(filename):
 
 
 def first(filename):
-    """Returns first matching file path."""
+    """
+    Returns first matching file path. (Like ``which`` on UNIX), or `None` if
+    nothing matches.
+    """
     try:
         return next(iwhere(filename))
     except StopIteration:
         return None
 
+which = first
+
 
 def iwhere(filename):
-    """Like where() but returns an iterator."""
+    """Iterator version of ``where()``."""
     possible_paths = _gen_possible_matches(filename)
     existing_file_paths = (p for p in possible_paths if os.path.isfile(p))
     return existing_file_paths
 
 
-def _gen_windows_matches(paths):
+def _gen_windows_matches(paths, include_bare=True):
+    """
+    Scans through extensions variants in the PATHEXT env-var (see links below)
+    as Windows does. If "include_bare" is True (default), the un-extended
+    path is also included (WHERE.exe does this, but CMD/PS don't seem to)
+
+    References:
+    http://stackoverflow.com/a/1653492/194586
+    https://technet.microsoft.com/en-us/library/cc723564.aspx#XSLTsection127121120120
+    """
+    path_exts = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(';')
+
     for path in paths:
-        yield path
-        yield path + ".bat"
-        yield path + ".com"
-        yield path + ".exe"
+        if include_bare:
+            yield path
+        for ext in path_exts:
+            yield path + ext
 
 
 def _gen_possible_matches(filename):
