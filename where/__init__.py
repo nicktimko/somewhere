@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import os
 import platform
-import itermate
 
 
 WINDOWS_EXTENSIONS = ['', '.bat', '.com', '.exe']
@@ -35,15 +34,17 @@ def _gen_windows_matches(paths):
 
 
 def _gen_possible_matches(filename):
-    path_parts = os.environ.get("PATH", "").split(os.pathsep)
-    path_parts = itertools.chain((os.curdir,), path_parts)
+    path_parts = [os.curdir] + os.environ.get("PATH", "").split(os.pathsep)
     possible_paths = (os.path.join(path_part, filename) for path_part in path_parts)
 
     if platform.system() == "Windows":
-        possible_paths = itermate.imapchain(_gen_windows_matches, possible_paths)
+        possible_paths = _gen_windows_matches(possible_paths)
 
     possible_paths = (os.path.abspath(p) for p in possible_paths)
 
-    result = itermate.unique(possible_paths)
-
-    return result
+    results = set()
+    for result in possible_paths:
+        if result in results:
+            continue
+        yield result
+        results.add(result)
