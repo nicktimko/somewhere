@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import sys
 import argparse
@@ -6,9 +6,8 @@ import argparse
 import where
 
 
-
 def main():
-    parser = argparse.ArgumentParser( description="Find the locations of a file in the environment's paths." )
+    parser = argparse.ArgumentParser(description="Find the locations of a file in the environment's paths.")
 
     parser.add_argument("filename", type=str, help="The filename to be found")
 
