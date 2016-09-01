@@ -16,7 +16,12 @@ def test_where_iwhere_executes():
 
 
 def test_windows_matches():
-    assert 'python.exe' in list(where._gen_windows_matches('python'))
+    fake_paths = ['C:\\', 'C:\\Python35']
+    paths = [fp + '\\python' for fp in fake_paths]
+    win_paths = list(where._gen_windows_matches(paths))
+
+    for fp in fake_paths:
+        assert fp + '\\python.exe' in win_paths
 
 
 if __name__ == "__main__":
