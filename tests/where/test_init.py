@@ -1,21 +1,22 @@
 import pytest
 
+import where
 
 
 def test_where_first_executes():
-    import where
     where.first("python")
 
 
 def test_where_where_executes():
-    import where
     where.where("python")
 
 
 def test_where_iwhere_executes():
-    import where
     where.iwhere("python")
 
+
+def test_windows_matches():
+    assert 'python.exe' in list(where._gen_windows_matches('python'))
 
 
 if __name__ == "__main__":
