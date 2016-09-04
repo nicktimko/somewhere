@@ -73,31 +73,37 @@ import stat
 
 WIN = platform.system() == "Windows"
 
+if WIN:
+    try:
+        import winreg
+    except ImportError:
+        import _winreg as winreg
+
 
 class WhichError(Exception):
     pass
 
 
-#---- internal support stuff
-
-def _getRegisteredExecutable(exeName):
+def _get_registered_executable(exe_name):
     """Windows allow application paths to be registered in the registry."""
-    registered = None
     if not WIN:
-        return registered
+        return
 
-    if os.path.splitext(exeName)[1].lower() != '.exe':
-        exeName += '.exe'
-    import _winreg
+    if os.path.splitext(exe_name)[1].lower() != '.exe':
+        exe_name += '.exe'
+
+    if not os.path.exists(exe_name):
+        return
+
     try:
-        key = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" +\
-              exeName
-        value = _winreg.QueryValue(_winreg.HKEY_LOCAL_MACHINE, key)
-        registered = (value, "from HKLM\\"+key)
-    except _winreg.error:
-        pass
-    if registered and not os.path.exists(registered[0]):
-        registered = None
+        key = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\' + exe_name
+        value = winreg.QueryValue(winreg.HKEY_LOCAL_MACHINE, key)
+        registered = {
+            'path': exe_name,
+            'key': 'HKLM\\{}'.format(key),
+        }
+    except winreg.error:
+        return
 
     return registered
 
@@ -161,13 +167,13 @@ def whichgen(command, path=None, verbose=0, exts=None):
     if path is None:
         usingGivenPath = 0
         path = os.environ.get("PATH", "").split(os.pathsep)
-        if sys.platform.startswith("win"):
+        if WIN:
             path.insert(0, os.curdir)  # implied by Windows shell
     else:
         usingGivenPath = 1
 
     # Windows has the concept of a list of extensions (PATHEXT env var).
-    if sys.platform.startswith("win"):
+    if WIN:
         if exts is None:
             exts = os.environ.get("PATHEXT", "").split(os.pathsep)
             # If '.exe' is not in exts then obviously this is Win9x and
@@ -181,8 +187,8 @@ def whichgen(command, path=None, verbose=0, exts=None):
             raise TypeError("'exts' argument must be a list or None")
     else:
         if exts is not None:
-            raise WhichError("'exts' argument is not supported on "\
-                             "platform '%s'" % sys.platform)
+            raise ValueError("'exts' argument is not supported on "\
+                             "platform '{}'" % platform.system())
         exts = []
 
     # File name cannot have path separators because PATH lookup does not
@@ -194,14 +200,14 @@ def whichgen(command, path=None, verbose=0, exts=None):
                 yield match
             else:
                 yield match[0]
+
     else:
         for i in range(len(path)):
             dirName = path[i]
             # On windows the dirName *could* be quoted, drop the quotes
-            if sys.platform.startswith("win") and len(dirName) >= 2\
-               and dirName[0] == '"' and dirName[-1] == '"':
+            if WIN and len(dirName) >= 2 and dirName[0] == '"' and dirName[-1] == '"':
                 dirName = dirName[1:-1]
-            for ext in ['']+exts:
+            for ext in [''] + exts:
                 absName = os.path.abspath(
                     os.path.normpath(os.path.join(dirName, command+ext)))
                 if os.path.isfile(absName):
@@ -219,7 +225,7 @@ def whichgen(command, path=None, verbose=0, exts=None):
                             yield match
                         else:
                             yield match[0]
-        match = _getRegisteredExecutable(command)
+        match = _get_registered_executable(command)
         if match is not None:
             match = _cull(match, matches, verbose)
             if match:
@@ -282,17 +288,15 @@ def main(argv):
     try:
         optlist, args = getopt.getopt(argv[1:], 'haVvqp:e:',
             ['help', 'all', 'version', 'verbose', 'quiet', 'path=', 'exts='])
-    except getopt.GetoptError, msg:
-        sys.stderr.write("which: error: %s. Your invocation was: %s\n"\
-                         % (msg, argv))
-        sys.stderr.write("Try 'which --help'.\n")
+    except getopt.GetoptError as msg:
+        print("which: error: {}. Your invocation was: {}\nTry 'which --help'".format(msg, argv), file=sys.stderr)
         return 1
     for opt, optarg in optlist:
         if opt in ('-h', '--help'):
-            print _cmdlnUsage
+            print(_cmdlnUsage)
             return 0
         elif opt in ('-V', '--version'):
-            print "which %s" % __version__
+            print("which %s" % __version__)
             return 0
         elif opt in ('-a', '--all'):
             all = 1

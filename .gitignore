@@ -9,3 +9,7 @@ dist/
 
 # Testing
 .tox/
+
+# Other
+Untitled*.ipynb
+.ipynb_checkpoints/

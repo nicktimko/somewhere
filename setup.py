@@ -1,5 +1,5 @@
 import setuptools
-
+import somewhere
 
 long_description = '''\
 This is a GNU which replacement with the following features:
@@ -14,7 +14,7 @@ This is a GNU which replacement with the following features:
 
 setuptools.setup(
     name="somewhere",
-    version=which.__version__,
+    version=somewhere.__version__,
 
     author="Nick Timkovich",
     author_email="prometheus235@gmail.com",

@@ -4,14 +4,9 @@ import os
 import platform
 
 
-__all__ = ['first', 'iwhere', 'where', 'which']
+__all__ = ['first', 'where', 'which']
 
 WINDOWS_EXTENSIONS = ['', '.bat', '.com', '.exe']
-
-
-def where(filename):
-    """Returns all matching file paths."""
-    return list(iwhere(filename))
 
 
 def first(filename):
@@ -26,8 +21,7 @@ def first(filename):
 
 which = first
 
-def iwhere(filename):
-    """Iterator version of ``where()``."""
+def where(filename):
     possible_paths = _gen_possible_matches(filename)
     existing_file_paths = (p for p in possible_paths if os.path.isfile(p))
     return existing_file_paths
@@ -48,7 +42,7 @@ def _gen_windows_matches(paths, include_bare=True):
     for path in paths:
         if include_bare:
             yield path
-        for ext in path_exts:
+
 
 def _gen_windows_matches(paths):
     for path in paths:
