@@ -16,7 +16,3 @@ def main():
 
     for result in where.iwhere(args.filename):
         print(result)
-
-
-if __name__ == "__main__":
-    sys.exit(main())

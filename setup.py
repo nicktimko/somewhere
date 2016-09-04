@@ -1,34 +1,7 @@
 import setuptools
 
-setuptools.setup(
-    name="where",
-    packages=["where"],
-    version="1.0.2",
-    description=description,
-    author='Henry Weickert',
-    author_email='henryweickert@gmail.com',
-    url='https://github.com/hweickert/where',
-    keywords=['where', 'which'],
-    entry_points={
-        'console_scripts': [
-            'where = where.__main__:main',
-        ]
-    },
-)
-#!/usr/bin/env python
-# Copyright (c) 2002-2005 ActiveState Corp.
-# Author: Trent Mick (TrentM@ActiveState.com)
 
-"""Distutils setup script for 'which'."""
-
-import sys
-import os
-import shutil
-
-
-description = "Locates files like the Windows 'where' or the Linux 'which' utilities."
-
-long_description = """\
+long_description = '''\
 This is a GNU which replacement with the following features:
 - it is portable (Windows, Linux);
 - it understands PATHEXT on Windows;
@@ -36,28 +9,39 @@ This is a GNU which replacement with the following features:
 - it can note "near misses" on the PATH (e.g. files that match but
   may not, say, have execute permissions; and
 - it can be used as a Python module.
-"""
-
-def _getBinDir():
-    """Return the current Python's bindir."""
-    if sys.platform.startswith("win"):
-        bindir = sys.prefix
-    else:
-        bindir = os.path.join(sys.prefix, "bin")
-    return bindir
+'''
 
 
 setuptools.setup(
     name="somewhere",
-    packages=['somewhere'],
     version=which.__version__,
-    description=description,
+
     author="Nick Timkovich",
     author_email="prometheus235@gmail.com",
-    url="http://github.com/nicktimko/",
-    license="MIT License",
-    platforms=["Windows", "Linux", "Mac OS X", "Unix"],
+    url="http://github.com/nicktimko/somewhere",
+    license="MIT",
+
+    packages=['somewhere'],
+    description="Locates files like the Windows 'where' or the *nix 'which' utilities.",
     long_description=long_description,
     keywords=["which", "find", "path", "where"],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Topic :: Utilities',
+    ],
 
+    entry_points={
+        'console_scripts': [
+            'where = where:main',
+        ]
+    },
 )

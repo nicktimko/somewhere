@@ -1,8 +1,8 @@
 # The MIT License (MIT)
 
-Copyright &copy; 2002-2005 ActiveState Corp.
-Copyright &copy; 2015-2016 Henry Weickert
-Copyright &copy; 2016 Nick Timkovich
+* Copyright &copy; 2002-2005 ActiveState Corporation
+* Copyright &copy; 2015-2016 Henry Weickert
+* Copyright &copy; 2016 Nick Timkovich
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

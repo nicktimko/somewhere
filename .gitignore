@@ -1,8 +1,11 @@
-.tox/
-.cache/
-venv/
-env/
+# Python Bytecode
+*.py[cod]
+__pycache__/
+
+# Build/Distribution
 build/
 dist/
 *.egg-info/
-*.pyc
+
+# Testing
+.tox/

@@ -1,10 +1,4 @@
-#!/usr/bin/env python
-# Copyright (c) 2002-2007 ActiveState Software Inc.
-# See LICENSE.txt for license details.
-# Author:
-#   Trent Mick (TrentM@ActiveState.com)
-# Home:
-#   http://trentm.com/projects/which/
+from __future__ import absolute_import, print_function
 
 r"""Find the full path to commands.
 
@@ -19,7 +13,7 @@ whichall(command, path=None, verbose=0, exts=None)
 whichgen(command, path=None, verbose=0, exts=None)
     Return a generator which will yield full paths to all matches of the
     given command on the path.
-    
+
 By default the PATH environment variable is searched (as well as, on
 Windows, the AppPaths key in the registry), but a specific 'path' list
 to search may be specified as well.  On Windows, the PATHEXT environment
@@ -65,22 +59,23 @@ _cmdlnUsage = """
     files without executable access.
 """
 
-__revision__ = "$Id: which.py 1448 2007-02-28 19:13:06Z trentm $"
-__version_info__ = (1, 1, 3)
-__version__ = '.'.join(map(str, __version_info__))
+__version_info__ = (1, 2, 0)
+__version__ = '.'.join(str(n) for n in __version_info__)
+
 __all__ = ["which", "whichall", "whichgen", "WhichError"]
 
-import os
 import sys
+import os
+import platform
 import getopt
 import stat
 
 
-#---- exceptions
+WIN = platform.system() == "Windows"
+
 
 class WhichError(Exception):
     pass
-
 
 
 #---- internal support stuff
@@ -88,27 +83,32 @@ class WhichError(Exception):
 def _getRegisteredExecutable(exeName):
     """Windows allow application paths to be registered in the registry."""
     registered = None
-    if sys.platform.startswith('win'):
-        if os.path.splitext(exeName)[1].lower() != '.exe':
-            exeName += '.exe'
-        import _winreg
-        try:
-            key = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" +\
-                  exeName
-            value = _winreg.QueryValue(_winreg.HKEY_LOCAL_MACHINE, key)
-            registered = (value, "from HKLM\\"+key)
-        except _winreg.error:
-            pass
-        if registered and not os.path.exists(registered[0]):
-            registered = None
+    if not WIN:
+        return registered
+
+    if os.path.splitext(exeName)[1].lower() != '.exe':
+        exeName += '.exe'
+    import _winreg
+    try:
+        key = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" +\
+              exeName
+        value = _winreg.QueryValue(_winreg.HKEY_LOCAL_MACHINE, key)
+        registered = (value, "from HKLM\\"+key)
+    except _winreg.error:
+        pass
+    if registered and not os.path.exists(registered[0]):
+        registered = None
+
     return registered
 
+
 def _samefile(fname1, fname2):
-    if sys.platform.startswith('win'):
-        return ( os.path.normpath(os.path.normcase(fname1)) ==\
-            os.path.normpath(os.path.normcase(fname2)) )
+    if WIN:
+        return (os.path.normpath(os.path.normcase(fname1)) ==
+            os.path.normpath(os.path.normcase(fname2)))
     else:
         return os.path.samefile(fname1, fname2)
+
 
 def _cull(potential, matches, verbose=0):
     """Cull inappropriate matches. Possible reasons:
@@ -136,12 +136,10 @@ def _cull(potential, matches, verbose=0):
             matches.append(potential)
             return potential
 
-        
-#---- module API
 
 def whichgen(command, path=None, verbose=0, exts=None):
     """Return a generator of full paths to the given command.
-    
+
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it
         to use the PATH environment variable.
@@ -234,7 +232,7 @@ def whichgen(command, path=None, verbose=0, exts=None):
 def which(command, path=None, verbose=0, exts=None):
     """Return the full path to the first match of the given command on
     the path.
-    
+
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it
         to use the PATH environment variable.
@@ -258,7 +256,7 @@ def which(command, path=None, verbose=0, exts=None):
 
 def whichall(command, path=None, verbose=0, exts=None):
     """Return a list of full paths to all matches of the given command
-    on the path.  
+    on the path.
 
     "command" is a the name of the executable to search for.
     "path" is an optional alternate path list to search. The default it
@@ -273,11 +271,8 @@ def whichall(command, path=None, verbose=0, exts=None):
         not a VisualBasic script but ".vbs" is on PATHEXT. This option
         is only supported on Windows.
     """
-    return list( whichgen(command, path, verbose, exts) )
+    return list(whichgen(command, path, verbose, exts))
 
-
-
-#---- mainline
 
 def main(argv):
     all = 0
@@ -325,9 +320,9 @@ def main(argv):
         nmatches = 0
         for match in whichgen(arg, path=altpath, verbose=verbose, exts=exts):
             if verbose:
-                print "%s (%s)" % match
+                print("%s (%s)" % match)
             else:
-                print match
+                print(match)
             nmatches += 1
             if not all:
                 break
@@ -337,6 +332,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    sys.exit( main(sys.argv) )
-
-
+    sys.exit(main(sys.argv))
