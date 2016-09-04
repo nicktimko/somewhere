@@ -1,10 +1,12 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import
 
 import os
 import platform
 
 
 __all__ = ['first', 'iwhere', 'where', 'which']
+
+WINDOWS_EXTENSIONS = ['', '.bat', '.com', '.exe']
 
 
 def where(filename):
@@ -23,7 +25,6 @@ def first(filename):
         return None
 
 which = first
-
 
 def iwhere(filename):
     """Iterator version of ``where()``."""
@@ -48,12 +49,16 @@ def _gen_windows_matches(paths, include_bare=True):
         if include_bare:
             yield path
         for ext in path_exts:
+
+def _gen_windows_matches(paths):
+    for path in paths:
+        for ext in WINDOWS_EXTENSIONS:
             yield path + ext
 
 
 def _gen_possible_matches(filename):
     path_parts = [os.curdir] + os.environ.get("PATH", "").split(os.pathsep)
-    possible_paths = (os.path.join(pp, filename) for pp in path_parts)
+    possible_paths = (os.path.join(path_part, filename) for path_part in path_parts)
 
     if platform.system() == "Windows":
         possible_paths = _gen_windows_matches(possible_paths)
